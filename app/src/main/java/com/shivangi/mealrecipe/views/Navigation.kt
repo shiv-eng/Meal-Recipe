@@ -1,4 +1,4 @@
-package com.harsh_kumar.meals.views
+package com.shivangi.mealrecipe.views
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -7,9 +7,9 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.harsh_kumar.meals.views.Screen.FavoriteScreen
-import com.harsh_kumar.meals.views.Screen.RandomMealScreen
-import com.harsh_kumar.meals.views.Screen.SearchMealScreen
+import com.shivangi.mealrecipe.views.Screen.FavoriteScreen
+import com.shivangi.mealrecipe.views.Screen.RandomMealScreen
+import com.shivangi.mealrecipe.views.Screen.SearchMealScreen
 
 @Composable
 fun Navigation(navHostController: NavHostController, innerPadding: PaddingValues) {

@@ -1,4 +1,4 @@
-package com.harsh_kumar.meals.views
+package com.shivangi.mealrecipe.views
 
 sealed class Screen(val route: String) {
     object RandomMealScreen : Screen("Random")

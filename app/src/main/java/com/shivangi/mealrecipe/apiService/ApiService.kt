@@ -1,6 +1,6 @@
-package com.harsh_kumar.meals.apiService
+package com.shivangi.mealrecipe.apiService
 
-import com.harsh_kumar.meals.model.MealResponse
+import com.shivangi.mealrecipe.model.MealResponse
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.GET

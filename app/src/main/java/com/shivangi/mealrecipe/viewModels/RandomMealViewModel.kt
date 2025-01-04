@@ -1,12 +1,12 @@
-package com.harsh_kumar.meals.viewModels
+package com.shivangi.mealrecipe.viewModels
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.harsh_kumar.meals.apiService.mealService
-import com.harsh_kumar.meals.model.MealResponse
-import com.harsh_kumar.meals.model.RandomMealState
+import com.shivangi.mealrecipe.apiService.mealService
+import com.shivangi.mealrecipe.model.MealResponse
+import com.shivangi.mealrecipe.model.RandomMealState
 import kotlinx.coroutines.launch
 
 class RandomMealViewModel : ViewModel() {

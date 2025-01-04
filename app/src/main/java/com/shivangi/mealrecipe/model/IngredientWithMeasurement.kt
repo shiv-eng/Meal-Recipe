@@ -1,3 +1,3 @@
-package com.harsh_kumar.meals.model
+package com.shivangi.mealrecipe.model
 
 data class IngredientWithMeasurement(val ingredient: String, val measurement: String)

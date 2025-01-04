@@ -1,20 +1,10 @@
-package com.harsh_kumar.meals.views
+package com.shivangi.mealrecipe.views
 
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -22,35 +12,19 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.rounded.KeyboardArrowDown
-import androidx.compose.material.icons.rounded.KeyboardArrowUp
-import androidx.compose.material.icons.sharp.PlayArrow
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.harsh_kumar.meals.model.IngredientWithMeasurement
-import com.harsh_kumar.meals.model.Meal
-import com.harsh_kumar.meals.ui.theme.GreenBg
+import com.shivangi.mealrecipe.model.IngredientWithMeasurement
+import com.shivangi.mealrecipe.model.Meal
 
 @Composable
 fun BoxText(error: String) {
@@ -60,11 +34,9 @@ fun BoxText(error: String) {
     ) {
         Text(
             text = error,
-            style = MaterialTheme.typography.bodyLarge,
+            style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center,
-            fontFamily = FontFamily.Serif,
-            modifier = Modifier.padding(12.dp)
         )
     }
 }
@@ -72,162 +44,114 @@ fun BoxText(error: String) {
 @Composable
 fun MealList(meals: List<Meal>) {
     val context = LocalContext.current
+
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(vertical = 4.dp)
+        contentPadding = PaddingValues(8.dp)
     ) {
         items(meals) { meal ->
-            MealCard(meal = meal, context = context)
-            HorizontalDivider(thickness = 2.dp)
+            MealCard(meal, context)
+            Divider(thickness = 1.dp)
         }
     }
 }
 
 @Composable
 fun MealCard(meal: Meal, context: Context) {
-    var expanded by remember { mutableStateOf(true) }
+    var expanded by remember { mutableStateOf(false) }
 
-    Column(
+    Card(
+        shape = RoundedCornerShape(12.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(all = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(8.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.Top
+        ) {
+            // Meal image
+            AsyncImage(
+                model = meal.thumbnail,
+                contentDescription = "Meal thumbnail",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+            )
 
-        MealImage(
-            thumbnail = meal.thumbnail, modifier = Modifier
-                .padding(top = 12.dp)
-                .clip(RoundedCornerShape(30.dp))
-        )
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text(
                 text = meal.name,
-                modifier = Modifier
-                    .padding(top = 10.dp),
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onBackground,
-                fontFamily = FontFamily.Serif,
-                fontWeight = FontWeight.ExtraBold
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
             )
 
-            IconButton(
-                onClick = { expanded = !expanded },
-                modifier = Modifier.padding(top = 10.dp)
-            ) {
-                Icon(
-                    imageVector = if (expanded) Icons.Rounded.KeyboardArrowUp else Icons.Rounded.KeyboardArrowDown,
-                    contentDescription = "See More",
-                    tint = MaterialTheme.colorScheme.onBackground
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // Expand/collapse instructions
+            TextButton(onClick = { expanded = !expanded }) {
+                Text(
+                    text = if (expanded) "Hide Details" else "Show Details",
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
 
-        }
+            if (expanded) {
+                // Ingredients
+                Text(
+                    text = "Ingredients:",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Ingredients(meal.getIngredients())
 
-        if (expanded) {
+                Spacer(modifier = Modifier.height(4.dp))
 
-            HorizontalDivider(thickness = 1.5.dp)
+                // Instructions
+                Text(
+                    text = "Instructions:",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = meal.instructions,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
 
-            Text(
-                text = "Ingredients",
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 8.dp),
-                color = MaterialTheme.colorScheme.onBackground,
-                fontFamily = FontFamily.Serif
-            )
+                Spacer(modifier = Modifier.height(4.dp))
 
-            Ingredients(ingredients = meal.getIngredients(), modifier = Modifier.padding(8.dp))
-
-            HorizontalDivider(thickness = 1.5.dp)
-
-            Text(
-                text = "Instructions",
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp),
-                color = MaterialTheme.colorScheme.onBackground,
-                fontFamily = FontFamily.Serif
-            )
-
-            Text(
-                text = meal.instructions,
-                modifier = Modifier.padding(horizontal = 8.dp),
-                color = MaterialTheme.colorScheme.onBackground,
-            )
-
-            HorizontalDivider(thickness = 1.5.dp, modifier = Modifier.padding(top = 8.dp))
-
-            Button(
-                onClick = {
-                    val contentToShare = "${meal.name}\n\n${meal.instructions}"
-                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                        type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, contentToShare)
+                // Share Button
+                Button(
+                    onClick = {
+                        val contentToShare = "${meal.name}\n\n${meal.instructions}"
+                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_TEXT, contentToShare)
+                        }
+                        context.startActivity(Intent.createChooser(shareIntent, null))
                     }
-                    context.startActivity(Intent.createChooser(shareIntent, null))
-                },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = GreenBg,
-                    contentColor = MaterialTheme.colorScheme.onBackground
-                ),
-                modifier = Modifier.padding(top = 8.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = "Share recipe"
-                    )
-                    Text(
-                        text = "Share",
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
+                    Icon(Icons.Default.Share, contentDescription = "Share")
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Share")
                 }
             }
-
         }
-
     }
 }
 
 @Composable
-fun MealImage(thumbnail: String?, modifier: Modifier = Modifier) {
-    AsyncImage(
-        model = thumbnail,
-        contentDescription = "Thumbnail Image of Meal",
-        modifier = modifier
-    )
-}
-
-@Composable
-fun Ingredients(ingredients: List<IngredientWithMeasurement>, modifier: Modifier = Modifier) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .then(modifier)
-    ) {
-        ingredients.forEach { ingredient ->
-            Row {
-                Text(
-                    text = ingredient.ingredient + ":",
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = ingredient.measurement,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
+fun Ingredients(ingredients: List<IngredientWithMeasurement>) {
+    Column {
+        ingredients.forEach { item ->
+            Text(
+                text = "${item.ingredient}: ${item.measurement}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
         }
     }
 }
@@ -235,159 +159,97 @@ fun Ingredients(ingredients: List<IngredientWithMeasurement>, modifier: Modifier
 @Composable
 fun RandomMealItem(meal: Meal) {
     val context = LocalContext.current
-    var intent: Intent
 
+    // Simple scrollable container
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(color = GreenBg),
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        MealImage(
-            thumbnail = meal.thumbnail,
+        // Meal image
+        AsyncImage(
+            model = meal.thumbnail,
+            contentDescription = "Random Meal thumbnail",
             modifier = Modifier
-                .padding(top = 12.dp)
-                .clip(RoundedCornerShape(30.dp))
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
         )
 
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Meal name
         Text(
             text = meal.name,
-            style = MaterialTheme.typography.headlineMedium,
-            color = Color.LightGray,
-            modifier = Modifier.padding(top = 8.dp, start = 8.dp, end = 8.dp),
-            fontWeight = FontWeight.Bold,
-            fontFamily = FontFamily.Serif
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+
+        // Origin
+        Text(
+            text = "Origin: " + (meal.origin ?: "Unknown"),
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.Gray
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Ingredients
+        Text(
+            text = "Ingredients:",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+
+        Ingredients(meal.getIngredients())
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Instructions
+        Text(
+            text = "Instructions:",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Text(
-            text = "origin: " + meal.origin,
-            color = Color.LightGray,
-            fontWeight = FontWeight.Thin,
-            fontFamily = FontFamily.Serif,
-            fontStyle = FontStyle.Italic
+            text = meal.instructions,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground
         )
 
-        Box(modifier = Modifier.clip(RoundedCornerShape(30.dp))) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(0.95f)
-                    .wrapContentSize()
-                    .clip(RoundedCornerShape(30.dp))
-                    .background(color = MaterialTheme.colorScheme.background)
-            ) {
+        Spacer(modifier = Modifier.height(16.dp))
 
-                Column(
-                    modifier = Modifier
-                        .verticalScroll(rememberScrollState())
-                        .padding(4.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-
-                    Text(
-                        text = "Ingredients",
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 8.dp),
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontFamily = FontFamily.Serif
-                    )
-
-                    Ingredients(
-                        ingredients = meal.getIngredients(),
-                        modifier = Modifier.padding(8.dp)
-                    )
-
-                    HorizontalDivider(thickness = 1.5.dp)
-
-                    Text(
-                        text = "Instructions",
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 12.dp),
-                        color = MaterialTheme.colorScheme.onBackground,
-                        fontFamily = FontFamily.Serif
-                    )
-
-                    Text(
-                        text = meal.instructions,
-                        modifier = Modifier.padding(top = 4.dp, start = 8.dp, end = 8.dp),
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        if (meal.youtubeLink != null) {
-                            Button(
-                                onClick = {
-                                    intent = Intent(Intent.ACTION_VIEW, Uri.parse(meal.youtubeLink))
-                                    context.startActivity(intent)
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = GreenBg,
-                                    contentColor = MaterialTheme.colorScheme.onBackground
-                                )
-                            ) {
-
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center
-                                ) {
-                                    Icon(
-                                        Icons.Sharp.PlayArrow,
-                                        contentDescription = "Play Button",
-                                    )
-                                    Text(
-                                        text = "Preview",
-                                        modifier = Modifier.padding(start = 8.dp)
-                                    )
-                                }
-
-                            }
-                        }
-
-                        Button(
-                            onClick = {
-                                val contentToShare = "${meal.name}\n${meal.instructions}"
-                                intent = Intent(Intent.ACTION_SEND).apply {
-                                    type = "text/plain"
-                                    putExtra(Intent.EXTRA_TEXT, contentToShare)
-                                }
-                                context.startActivity(Intent.createChooser(intent, null))
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = GreenBg,
-                                contentColor = MaterialTheme.colorScheme.onBackground
-                            )
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Share,
-                                    contentDescription = "Share recipe"
-                                )
-                                Text(
-                                    text = "Share",
-                                    modifier = Modifier.padding(start = 8.dp)
-                                )
-                            }
-                        }
-                    }
-
-                } // Column
+        // YouTube Link and Share
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            if (!meal.youtubeLink.isNullOrBlank()) {
+                Button(onClick = {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(meal.youtubeLink))
+                    context.startActivity(intent)
+                }) {
+                    Icon(Icons.Default.PlayArrow, contentDescription = "Play")
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Preview")
+                }
             }
-        } // Box
+
+            Button(onClick = {
+                val contentToShare = "${meal.name}\n${meal.instructions}"
+                val intent = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, contentToShare)
+                }
+                context.startActivity(Intent.createChooser(intent, null))
+            }) {
+                Icon(Icons.Default.Share, contentDescription = "Share recipe")
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Share")
+            }
+        }
     }
 }

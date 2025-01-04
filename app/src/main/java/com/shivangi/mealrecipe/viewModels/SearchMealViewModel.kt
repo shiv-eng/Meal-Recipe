@@ -1,12 +1,12 @@
-package com.harsh_kumar.meals.viewModels
+package com.shivangi.mealrecipe.viewModels
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.harsh_kumar.meals.apiService.mealService
-import com.harsh_kumar.meals.model.SearchMealState
+import com.shivangi.mealrecipe.apiService.mealService
+import com.shivangi.mealrecipe.model.SearchMealState
 import kotlinx.coroutines.launch
 
 class SearchMealViewModel : ViewModel() {

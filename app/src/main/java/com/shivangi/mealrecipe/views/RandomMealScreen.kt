@@ -1,6 +1,6 @@
 package com.shivangi.mealrecipe.views
 
-
+import android.os.Bundle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,14 +32,16 @@ fun RandomMealScreen(modifier: Modifier = Modifier) {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Simmering flavors, one pixel at a time...",
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.colorScheme.onBackground,
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
             }
             randomMealState.error != null -> {
                 Text(
                     text = randomMealState.error ?: "Unknown error",
-                    color = MaterialTheme.colorScheme.error
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyLarge
                 )
             }
             else -> {

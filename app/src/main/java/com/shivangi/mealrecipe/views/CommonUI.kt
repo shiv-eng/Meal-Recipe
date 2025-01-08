@@ -152,7 +152,7 @@ fun MealCard(meal: Meal, context: Context) {
 
 @Composable
 fun Ingredients(ingredients: List<IngredientWithMeasurement>) {
-    Column(modifier = Modifier.padding(start = 8.dp)) {
+    Column(modifier = Modifier.padding(start = 10.dp)) {
         ingredients.forEach { item ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,

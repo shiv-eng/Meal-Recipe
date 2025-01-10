@@ -1,0 +1,172 @@
+// File: com/shivangi/mealrecipe/views/FavoriteMealCard.kt
+
+package com.shivangi.mealrecipe.views
+
+import android.content.Intent
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import com.shivangi.mealrecipe.model.FavoriteMeal
+import com.shivangi.mealrecipe.viewModels.FavoritesViewModel
+import kotlinx.coroutines.launch
+
+@Composable
+fun FavoriteMealCard(favoriteMeal: FavoriteMeal, favoritesViewModel: FavoritesViewModel) {
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    var isFavorite by remember { mutableStateOf(true) }
+
+    LaunchedEffect(favoritesViewModel.allFavorites) {
+        favoritesViewModel.allFavorites.value?.let { favorites ->
+            isFavorite = favorites.any { it.mealId == favoriteMeal.mealId }
+        }
+    }
+
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 300.dp)
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+        ) {
+            // Meal Image with Favorite Icon Overlay
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+                    .clip(RoundedCornerShape(12.dp))
+            ) {
+                AsyncImage(
+                    model = favoriteMeal.thumbnail,
+                    contentDescription = "Favorite Meal Thumbnail",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxSize()
+                )
+                Icon(
+                    imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                    contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+                    tint = if (isFavorite) Color.Red else Color.White,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                        .size(24.dp)
+                        .clickable {
+                            scope.launch {
+                                if (isFavorite) {
+                                    favoritesViewModel.removeFavorite(
+                                        FavoriteMeal(
+                                            mealId = favoriteMeal.mealId,
+                                            name = favoriteMeal.name,
+                                            thumbnail = favoriteMeal.thumbnail,
+                                            origin = favoriteMeal.origin,
+                                            instructions = favoriteMeal.instructions,
+                                            youtubeLink = favoriteMeal.youtubeLink
+                                        )
+                                    )
+                                } else {
+                                    favoritesViewModel.addFavorite(
+                                        FavoriteMeal(
+                                            mealId = favoriteMeal.mealId,
+                                            name = favoriteMeal.name,
+                                            thumbnail = favoriteMeal.thumbnail,
+                                            origin = favoriteMeal.origin,
+                                            instructions = favoriteMeal.instructions,
+                                            youtubeLink = favoriteMeal.youtubeLink
+                                        )
+                                    )
+                                }
+                                isFavorite = !isFavorite
+                            }
+                        }
+                )
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Meal Name
+            Text(
+                text = favoriteMeal.name,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Expand/Collapse Button
+            var expanded by remember { mutableStateOf(false) }
+            TextButton(onClick = { expanded = !expanded }) {
+                Text(
+                    text = if (expanded) "Hide Details" else "Show Details",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            if (expanded) {
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Ingredients Section
+                Text(
+                    text = "Ingredients:",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Ingredients(favoriteMeal.getIngredients())
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Instructions Section
+                Text(
+                    text = "Instructions:",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                InstructionList(favoriteMeal.instructions)
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Share Button
+                Button(
+                    onClick = {
+                        val contentToShare = "${favoriteMeal.name}\n\n${favoriteMeal.instructions}"
+                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(Intent.EXTRA_TEXT, contentToShare)
+                        }
+                        context.startActivity(Intent.createChooser(shareIntent, "Share via"))
+                    },
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Icon(Icons.Filled.Share, contentDescription = "Share")
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Share")
+                }
+            }
+        }
+    }
+}

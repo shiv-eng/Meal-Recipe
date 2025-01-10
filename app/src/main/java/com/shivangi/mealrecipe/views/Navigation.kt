@@ -1,3 +1,5 @@
+// File: com/shivangi/mealrecipe/views/Navigation.kt
+
 package com.shivangi.mealrecipe.views
 
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,10 +16,10 @@ fun Navigation(navHostController: NavHostController, innerPadding: PaddingValues
         navController = navHostController,
         startDestination = Screen.RandomMealScreen.route
     ) {
-        composable(route = Screen.RandomMealScreen.route) {
+        composable(Screen.RandomMealScreen.route) {
             RandomMealScreen(modifier = Modifier.padding(innerPadding))
         }
-        composable(route = Screen.FavoriteScreen.route) {
+        composable(Screen.FavoriteScreen.route) {
             FavoriteScreen(modifier = Modifier.padding(innerPadding))
         }
     }

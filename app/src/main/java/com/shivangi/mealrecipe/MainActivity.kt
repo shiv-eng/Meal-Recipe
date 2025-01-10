@@ -1,17 +1,11 @@
+// File: com/shivangi.mealrecipe/MainActivity.kt
+
 package com.shivangi.mealrecipe
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -22,11 +16,13 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardActions
+import androidx.compose.ui.text.input.KeyboardOptions
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.shivangi.mealrecipe.ui.theme.RentalsTheme
+import com.shivangi.mealrecipe.viewModels.FavoritesViewModel
 import com.shivangi.mealrecipe.viewModels.SearchMealViewModel
 import com.shivangi.mealrecipe.views.*
 import kotlinx.coroutines.launch
@@ -36,19 +32,22 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
         setContent {
             RentalsTheme {
                 val navController = rememberNavController()
                 val searchMealViewModel: SearchMealViewModel = viewModel()
-                val searchMealState by searchMealViewModel.searchMealState
+                val favoritesViewModel: FavoritesViewModel = viewModel()
+                val searchMealState by searchMealViewModel.searchMealState.collectAsState()
 
                 var isSearching by remember { mutableStateOf(false) }
                 var searchText by remember { mutableStateOf(TextFieldValue("")) }
 
-                val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-                var showBottomSheet by remember { mutableStateOf(false) }
+                val sheetState = rememberModalBottomSheetState(
+                    skipPartiallyExpanded = true,
+                    initialValue = SheetValue.Hidden
+                )
                 val scope = rememberCoroutineScope()
+                var showBottomSheet by remember { mutableStateOf(false) }
 
                 // Show bottom sheet if no results
                 LaunchedEffect(searchMealState.meals, searchMealState.loading) {
@@ -56,6 +55,9 @@ class MainActivity : ComponentActivity() {
                         searchMealState.meals.isNullOrEmpty() &&
                         searchText.text.isNotBlank()
                     ) {
+                        scope.launch {
+                            sheetState.show()
+                        }
                         showBottomSheet = true
                     }
                 }
@@ -77,8 +79,10 @@ class MainActivity : ComponentActivity() {
                                             onSearch = {
                                                 searchMealViewModel.searchQuery.value = searchText.text
                                                 searchMealViewModel.fetchSearchMeal()
+                                                isSearching = false
                                             }
-                                        )
+                                        ),
+                                        modifier = Modifier.fillMaxWidth()
                                     )
                                 } else {
                                     Text("Meal Recipe")
@@ -91,82 +95,107 @@ class MainActivity : ComponentActivity() {
                                         searchText = TextFieldValue("")
                                         searchMealViewModel.fetchSearchMeal()
                                     }) {
-                                        Icon(Icons.Default.Close, contentDescription = null)
+                                        Icon(Icons.Filled.Close, contentDescription = "Close Search")
                                     }
                                 }
                             },
                             actions = {
                                 if (!isSearching) {
                                     IconButton(onClick = { isSearching = true }) {
-                                        Icon(Icons.Default.Search, contentDescription = null)
+                                        Icon(Icons.Filled.Search, contentDescription = "Search")
                                     }
                                 } else {
                                     IconButton(onClick = {
                                         searchMealViewModel.searchQuery.value = searchText.text
                                         searchMealViewModel.fetchSearchMeal()
+                                        isSearching = false
                                     }) {
-                                        Icon(Icons.Default.Check, contentDescription = null)
+                                        Icon(Icons.Filled.Check, contentDescription = "Confirm Search")
                                     }
                                 }
                                 IconButton(onClick = {
                                     navController.navigate(Screen.RandomMealScreen.route)
                                 }) {
-                                    Icon(Icons.Default.Shuffle, contentDescription = null)
+                                    Icon(Icons.Filled.Shuffle, contentDescription = "Random Meal")
                                 }
                                 IconButton(onClick = {
                                     navController.navigate(Screen.FavoriteScreen.route) {
                                         popUpTo(Screen.RandomMealScreen.route) { inclusive = false }
                                     }
                                 }) {
-                                    Icon(Icons.Default.Favorite, contentDescription = null)
+                                    Icon(Icons.Filled.Favorite, contentDescription = "Favorite Meals")
                                 }
                             },
-                            colors = TopAppBarDefaults.topAppBarColors()
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                                navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                                actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+                            )
                         )
                     }
                 ) { paddingValues ->
-                    // Show search results if searching + text typed
-                    if (isSearching && searchText.text.isNotBlank()) {
-                        when {
-                            searchMealState.loading -> {
-                                BoxText("Searching...")
+                    Box(modifier = Modifier.padding(paddingValues)) {
+                        // Show search results if searching and text is typed
+                        if (isSearching && searchText.text.isNotBlank()) {
+                            when {
+                                searchMealState.loading -> {
+                                    BoxText("Searching...")
+                                }
+                                searchMealState.error != null -> {
+                                    BoxText("Error: ${searchMealState.error}")
+                                }
+                                !searchMealState.meals.isNullOrEmpty() -> {
+                                    MealList(meals = searchMealState.meals!!, favoritesViewModel = favoritesViewModel)
+                                }
+                                else -> {
+                                    Spacer(Modifier.padding(paddingValues))
+                                }
                             }
-                            searchMealState.error != null -> {
-                                BoxText("Error: ${searchMealState.error}")
-                            }
-                            !searchMealState.meals.isNullOrEmpty() -> {
-                                MealList(meals = searchMealState.meals!!)
-                            }
-                            else -> {
-                                Spacer(Modifier.padding(paddingValues))
-                            }
+                        } else {
+                            // Normal navigation content
+                            Navigation(navController, paddingValues)
                         }
-                    } else {
-                        // Normal nav content
-                        Navigation(navController, paddingValues)
-                    }
 
-                    // Bottom sheet (no results)
-                    if (showBottomSheet) {
-                        ModalBottomSheet(
-                            onDismissRequest = { showBottomSheet = false },
-                            sheetState = sheetState
-                        ) {
-                            Column(
+                        // Bottom sheet (no results)
+                        if (showBottomSheet) {
+                            ModalBottomSheet(
+                                onDismissRequest = {
+                                    showBottomSheet = false
+                                    scope.launch { sheetState.hide() }
+                                },
+                                sheetState = sheetState,
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                tonalElevation = 8.dp,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .background(MaterialTheme.colorScheme.surface)
-                                    .padding(16.dp),
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                                    .padding(horizontal = 16.dp)
                             ) {
-                                Text(
-                                    "No results found.\nTry a different search?",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Divider()
-                                Button(onClick = { showBottomSheet = false }) {
-                                    Text("OK")
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(24.dp),
+                                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    Text(
+                                        "No results found.",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        "Try a different search?",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Button(
+                                        onClick = {
+                                            showBottomSheet = false
+                                            scope.launch { sheetState.hide() }
+                                        },
+                                        modifier = Modifier.align(Alignment.End)
+                                    ) {
+                                        Text("OK")
+                                    }
                                 }
                             }
                         }

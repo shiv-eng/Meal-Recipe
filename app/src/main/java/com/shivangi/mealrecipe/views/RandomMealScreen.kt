@@ -1,6 +1,7 @@
+// File: com/shivangi/mealrecipe/views/RandomMealScreen.kt
+
 package com.shivangi.mealrecipe.views
 
-import android.os.Bundle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.CircularProgressIndicator

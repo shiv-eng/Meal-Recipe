@@ -2,15 +2,20 @@
 
 package com.shivangi.mealrecipe.views
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import com.shivangi.mealrecipe.model.FavoriteMeal
 import com.shivangi.mealrecipe.model.Meal
@@ -73,23 +79,29 @@ fun RandomMealItem(meal: Meal) {
                             if (isFavorite) {
                                 favoritesViewModel.removeFavorite(
                                     FavoriteMeal(
-                                        mealId = favoriteMeal.mealId,
-                                        name = favoriteMeal.name,
-                                        thumbnail = favoriteMeal.thumbnail,
-                                        origin = favoriteMeal.origin,
-                                        instructions = favoriteMeal.instructions,
-                                        youtubeLink = favoriteMeal.youtubeLink
+                                        mealId = meal.idMeal,
+                                        name = meal.name,
+                                        thumbnail = meal.thumbnail,
+                                        origin = meal.origin,
+                                        instructions = meal.instructions,
+                                        ingredient = meal.getIngredients().joinToString("; ") {
+                                            "${it.ingredient}:${it.measurement}"
+                                        },
+                                        youtubeLink = meal.youtubeLink
                                     )
                                 )
                             } else {
                                 favoritesViewModel.addFavorite(
                                     FavoriteMeal(
-                                        mealId = favoriteMeal.mealId,
-                                        name = favoriteMeal.name,
-                                        thumbnail = favoriteMeal.thumbnail,
-                                        origin = favoriteMeal.origin,
-                                        instructions = favoriteMeal.instructions,
-                                        youtubeLink = favoriteMeal.youtubeLink
+                                        mealId = meal.idMeal,
+                                        name = meal.name,
+                                        thumbnail = meal.thumbnail,
+                                        origin = meal.origin,
+                                        instructions = meal.instructions,
+                                        ingredient = meal.getIngredients().joinToString("; ") {
+                                            "${it.ingredient}:${it.measurement}"
+                                        },
+                                        youtubeLink = meal.youtubeLink
                                     )
                                 )
                             }

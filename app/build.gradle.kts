@@ -3,7 +3,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    kotlin("kapt") // Add KAPT plugin
+    // Make sure you have the KAPT plugin applied
+    kotlin("kapt") // This is essential for Room annotation processing
 }
 
 android {
@@ -76,12 +77,17 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.material.icons.extended)
 
-    // Room dependencies
+    // ──────────────────────────────────────────────────────────────────────────
+    // ROOM DEPENDENCIES (make sure these versions match your libs.versions.toml)
+    // ──────────────────────────────────────────────────────────────────────────
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
-    implementation(libs.androidx.runtime.livedata)
-    kapt(libs.room.compiler)
+    kapt(libs.room.compiler)  // KAPT is required for Room annotation processing
 
+    // Jetpack Compose LiveData support (if needed)
+    implementation(libs.androidx.runtime.livedata)
+
+    // Tests
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

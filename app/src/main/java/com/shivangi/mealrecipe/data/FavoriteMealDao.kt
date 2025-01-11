@@ -1,3 +1,5 @@
+// File: com/shivangi/mealrecipe/data/FavoriteMealDao.kt
+
 package com.shivangi.mealrecipe.data
 
 import androidx.room.*
@@ -16,6 +18,6 @@ interface FavoriteMealDao {
     @Delete
     suspend fun deleteFavorite(meal: FavoriteMeal)
 
-    @Query("SELECT EXISTS(SELECT 1 FROM favorite_meals WHERE mealId = :mealId)")
-    suspend fun isFavorite(mealId: String): Boolean
+    @Query("SELECT * FROM favorite_meals WHERE mealId = :mealId LIMIT 1")
+    suspend fun findMealById(mealId: String): FavoriteMeal?
 }

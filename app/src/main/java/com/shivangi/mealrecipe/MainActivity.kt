@@ -1,4 +1,4 @@
-// File: com/shivangi.mealrecipe/MainActivity.kt
+// Complete example in your MainActivity:
 
 package com.shivangi.mealrecipe
 
@@ -6,6 +6,9 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -14,11 +17,11 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardActions
-import androidx.compose.ui.text.input.KeyboardOptions
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.rememberNavController
 import com.shivangi.mealrecipe.ui.theme.RentalsTheme
@@ -32,24 +35,28 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
             RentalsTheme {
                 val navController = rememberNavController()
                 val searchMealViewModel: SearchMealViewModel = viewModel()
                 val favoritesViewModel: FavoritesViewModel = viewModel()
+
                 val searchMealState by searchMealViewModel.searchMealState.collectAsState()
 
                 var isSearching by remember { mutableStateOf(false) }
                 var searchText by remember { mutableStateOf(TextFieldValue("")) }
 
+                // Remove the initialValue parameter if it's not recognized
                 val sheetState = rememberModalBottomSheetState(
-                    skipPartiallyExpanded = true,
-                    initialValue = SheetValue.Hidden
+                    // No initialValue here
+                    skipPartiallyExpanded = true // or skipHalfExpanded = true on older versions
                 )
+
                 val scope = rememberCoroutineScope()
                 var showBottomSheet by remember { mutableStateOf(false) }
 
-                // Show bottom sheet if no results
+                // If search results are empty (and not loading) -> show sheet
                 LaunchedEffect(searchMealState.meals, searchMealState.loading) {
                     if (!searchMealState.loading &&
                         searchMealState.meals.isNullOrEmpty() &&
@@ -77,7 +84,7 @@ class MainActivity : ComponentActivity() {
                                         ),
                                         keyboardActions = KeyboardActions(
                                             onSearch = {
-                                                searchMealViewModel.searchQuery.value = searchText.text
+                                                searchMealViewModel.setSearchQuery(searchText.text)
                                                 searchMealViewModel.fetchSearchMeal()
                                                 isSearching = false
                                             }
@@ -93,6 +100,7 @@ class MainActivity : ComponentActivity() {
                                     IconButton(onClick = {
                                         isSearching = false
                                         searchText = TextFieldValue("")
+                                        // Optionally re-fetch if you want to clear results
                                         searchMealViewModel.fetchSearchMeal()
                                     }) {
                                         Icon(Icons.Filled.Close, contentDescription = "Close Search")
@@ -106,18 +114,20 @@ class MainActivity : ComponentActivity() {
                                     }
                                 } else {
                                     IconButton(onClick = {
-                                        searchMealViewModel.searchQuery.value = searchText.text
+                                        searchMealViewModel.setSearchQuery(searchText.text)
                                         searchMealViewModel.fetchSearchMeal()
                                         isSearching = false
                                     }) {
                                         Icon(Icons.Filled.Check, contentDescription = "Confirm Search")
                                     }
                                 }
+
                                 IconButton(onClick = {
                                     navController.navigate(Screen.RandomMealScreen.route)
                                 }) {
                                     Icon(Icons.Filled.Shuffle, contentDescription = "Random Meal")
                                 }
+
                                 IconButton(onClick = {
                                     navController.navigate(Screen.FavoriteScreen.route) {
                                         popUpTo(Screen.RandomMealScreen.route) { inclusive = false }
@@ -136,7 +146,7 @@ class MainActivity : ComponentActivity() {
                     }
                 ) { paddingValues ->
                     Box(modifier = Modifier.padding(paddingValues)) {
-                        // Show search results if searching and text is typed
+                        // Searching UI
                         if (isSearching && searchText.text.isNotBlank()) {
                             when {
                                 searchMealState.loading -> {
@@ -146,18 +156,21 @@ class MainActivity : ComponentActivity() {
                                     BoxText("Error: ${searchMealState.error}")
                                 }
                                 !searchMealState.meals.isNullOrEmpty() -> {
-                                    MealList(meals = searchMealState.meals!!, favoritesViewModel = favoritesViewModel)
+                                    MealList(
+                                        meals = searchMealState.meals!!,
+                                        favoritesViewModel = favoritesViewModel
+                                    )
                                 }
                                 else -> {
                                     Spacer(Modifier.padding(paddingValues))
                                 }
                             }
                         } else {
-                            // Normal navigation content
+                            // Default nav content
                             Navigation(navController, paddingValues)
                         }
 
-                        // Bottom sheet (no results)
+                        // Bottom sheet shown if no results
                         if (showBottomSheet) {
                             ModalBottomSheet(
                                 onDismissRequest = {

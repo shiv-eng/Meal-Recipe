@@ -18,6 +18,7 @@ class FavoritesRepository(private val favoriteMealDao: FavoriteMealDao) {
     }
 
     suspend fun isFavorite(mealId: String): Boolean {
-        return favoriteMealDao.isFavorite(mealId)
+        val found = favoriteMealDao.findMealById(mealId)
+        return (found != null)
     }
 }

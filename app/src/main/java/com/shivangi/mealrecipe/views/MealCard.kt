@@ -1,14 +1,14 @@
-// File: com/shivangi/mealrecipe/views/MealCard.kt
+// File: com/shivangi.mealrecipe/views/MealCard.kt
 
 package com.shivangi.mealrecipe.views
 
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.shivangi.mealrecipe.model.FavoriteMeal
@@ -27,6 +28,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun MealCard(meal: Meal, favoritesViewModel: FavoritesViewModel) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     var isFavorite by remember { mutableStateOf(false) }
 
     LaunchedEffect(favoritesViewModel.allFavorites) {
@@ -44,8 +46,7 @@ fun MealCard(meal: Meal, favoritesViewModel: FavoritesViewModel) {
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(
-            modifier = Modifier
-                .padding(16.dp)
+            modifier = Modifier.padding(16.dp)
         ) {
             // Meal Image with Favorite Icon Overlay
             Box(
@@ -58,8 +59,7 @@ fun MealCard(meal: Meal, favoritesViewModel: FavoritesViewModel) {
                     model = meal.thumbnail,
                     contentDescription = "Meal Thumbnail",
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
+                    modifier = Modifier.fillMaxSize()
                 )
                 Icon(
                     imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
@@ -79,6 +79,10 @@ fun MealCard(meal: Meal, favoritesViewModel: FavoritesViewModel) {
                                             thumbnail = meal.thumbnail,
                                             origin = meal.origin,
                                             instructions = meal.instructions,
+                                            // Convert all ingredients into a single string if needed:
+                                            ingredient = meal.getIngredients().joinToString("; ") {
+                                                "${it.ingredient}:${it.measurement}"
+                                            },
                                             youtubeLink = meal.youtubeLink
                                         )
                                     )
@@ -90,6 +94,9 @@ fun MealCard(meal: Meal, favoritesViewModel: FavoritesViewModel) {
                                             thumbnail = meal.thumbnail,
                                             origin = meal.origin,
                                             instructions = meal.instructions,
+                                            ingredient = meal.getIngredients().joinToString("; ") {
+                                                "${it.ingredient}:${it.measurement}"
+                                            },
                                             youtubeLink = meal.youtubeLink
                                         )
                                     )
@@ -99,6 +106,7 @@ fun MealCard(meal: Meal, favoritesViewModel: FavoritesViewModel) {
                         }
                 )
             }
+
             Spacer(modifier = Modifier.height(12.dp))
 
             // Meal Name
@@ -109,7 +117,10 @@ fun MealCard(meal: Meal, favoritesViewModel: FavoritesViewModel) {
             )
             Spacer(modifier = Modifier.height(8.dp))
 
-            Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
+            Divider(
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -132,10 +143,16 @@ fun MealCard(meal: Meal, favoritesViewModel: FavoritesViewModel) {
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(4.dp))
+
+                // Calls Meal's getIngredients() -> List<IngredientWithMeasurement>.
                 Ingredients(meal.getIngredients())
+
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
+                Divider(
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+                )
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // Instructions Section

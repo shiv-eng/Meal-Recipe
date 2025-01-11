@@ -1,3 +1,5 @@
+// File: com/shivangi/mealrecipe/data/AppDatabase.kt
+
 package com.shivangi.mealrecipe.data
 
 import android.content.Context
@@ -17,11 +19,13 @@ abstract class AppDatabase : RoomDatabase() {
 
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
-                    context.applicationContext,
-                    AppDatabase::class.java,
-                    "meal_database"
-                ).build()
+                val instance = Room
+                    .databaseBuilder(
+                        context.applicationContext,
+                        AppDatabase::class.java,
+                        "meal_database"
+                    )
+                    .build()
                 INSTANCE = instance
                 instance
             }

@@ -1,4 +1,4 @@
-// File: com/shivangi/mealrecipe/views/FavoriteMealCard.kt
+// File: com/shivangi.mealrecipe/views/FavoriteMealCard.kt
 
 package com.shivangi.mealrecipe.views
 
@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -73,33 +73,16 @@ fun FavoriteMealCard(favoriteMeal: FavoriteMeal, favoritesViewModel: FavoritesVi
                         .clickable {
                             scope.launch {
                                 if (isFavorite) {
-                                    favoritesViewModel.removeFavorite(
-                                        FavoriteMeal(
-                                            mealId = favoriteMeal.mealId,
-                                            name = favoriteMeal.name,
-                                            thumbnail = favoriteMeal.thumbnail,
-                                            origin = favoriteMeal.origin,
-                                            instructions = favoriteMeal.instructions,
-                                            youtubeLink = favoriteMeal.youtubeLink
-                                        )
-                                    )
+                                    favoritesViewModel.removeFavorite(favoriteMeal)
                                 } else {
-                                    favoritesViewModel.addFavorite(
-                                        FavoriteMeal(
-                                            mealId = favoriteMeal.mealId,
-                                            name = favoriteMeal.name,
-                                            thumbnail = favoriteMeal.thumbnail,
-                                            origin = favoriteMeal.origin,
-                                            instructions = favoriteMeal.instructions,
-                                            youtubeLink = favoriteMeal.youtubeLink
-                                        )
-                                    )
+                                    favoritesViewModel.addFavorite(favoriteMeal)
                                 }
                                 isFavorite = !isFavorite
                             }
                         }
                 )
             }
+
             Spacer(modifier = Modifier.height(12.dp))
 
             // Meal Name
@@ -110,7 +93,10 @@ fun FavoriteMealCard(favoriteMeal: FavoriteMeal, favoritesViewModel: FavoritesVi
             )
             Spacer(modifier = Modifier.height(8.dp))
 
-            Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
+            Divider(
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -133,10 +119,22 @@ fun FavoriteMealCard(favoriteMeal: FavoriteMeal, favoritesViewModel: FavoritesVi
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(4.dp))
+
+                // If your FavoriteMeal has no `getIngredients()` in the data class,
+                // you must implement it. Otherwise, ensure this function call resolves correctly.
+                // Example:
+                //   fun getIngredients(): List<IngredientWithMeasurement> { ... }
+                // in FavoriteMeal or handle it if it's not available.
+                //
+                // For demonstration, we'll assume you have a matching function that returns List<IngredientWithMeasurement>.
                 Ingredients(favoriteMeal.getIngredients())
+
                 Spacer(modifier = Modifier.height(8.dp))
 
-                Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
+                Divider(
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+                )
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // Instructions Section
@@ -146,6 +144,8 @@ fun FavoriteMealCard(favoriteMeal: FavoriteMeal, favoritesViewModel: FavoritesVi
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(4.dp))
+
+                // If your FavoriteMeal data class has 'instructions', you can display them here.
                 InstructionList(favoriteMeal.instructions)
 
                 Spacer(modifier = Modifier.height(12.dp))

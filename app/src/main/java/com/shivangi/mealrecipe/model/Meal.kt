@@ -3,6 +3,7 @@ package com.shivangi.mealrecipe.model
 import com.google.gson.annotations.SerializedName
 
 data class Meal(
+    @SerializedName("idMeal") val idMeal: String,
     @SerializedName("strMeal") val name: String,
     @SerializedName("strCategory") val category: String,
     @SerializedName("strInstructions") val instructions: String,

@@ -1,21 +1,21 @@
-// File: com/shivangi.mealrecipe/views/FavoriteMealCard.kt
-
+// ----------------------
+// FavoriteMealCard.kt
+// Make corners square, center ingredients, show toast, minimal blank space
+// ----------------------
 package com.shivangi.mealrecipe.views
 
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.*
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -25,47 +25,46 @@ import com.shivangi.mealrecipe.viewModels.FavoritesViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun FavoriteMealCard(favoriteMeal: FavoriteMeal, favoritesViewModel: FavoritesViewModel) {
+fun FavoriteMealCard(
+    favoriteMeal: FavoriteMeal,
+    favoritesViewModel: FavoritesViewModel
+) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var isFavorite by remember { mutableStateOf(true) }
 
     LaunchedEffect(favoritesViewModel.allFavorites) {
-        favoritesViewModel.allFavorites.value?.let { favorites ->
-            isFavorite = favorites.any { it.mealId == favoriteMeal.mealId }
+        favoritesViewModel.allFavorites.value?.let { list ->
+            isFavorite = list.any { it.mealId == favoriteMeal.mealId }
         }
     }
 
     Card(
-        shape = RoundedCornerShape(16.dp),
+        shape = RectangleShape,
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 300.dp)
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+            .heightIn(min = 250.dp)
+            .padding(horizontal = 8.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(
-            modifier = Modifier
-                .padding(16.dp)
+            modifier = Modifier.padding(8.dp)
         ) {
-            // Meal Image with Favorite Icon Overlay
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
-                    .clip(RoundedCornerShape(12.dp))
             ) {
                 AsyncImage(
                     model = favoriteMeal.thumbnail,
-                    contentDescription = "Favorite Meal Thumbnail",
+                    contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxSize()
+                    modifier = Modifier.fillMaxSize()
                 )
                 Icon(
                     imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                    contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
-                    tint = if (isFavorite) Color.Red else Color.White,
+                    contentDescription = null,
+                    tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(8.dp)
@@ -74,8 +73,22 @@ fun FavoriteMealCard(favoriteMeal: FavoriteMeal, favoritesViewModel: FavoritesVi
                             scope.launch {
                                 if (isFavorite) {
                                     favoritesViewModel.removeFavorite(favoriteMeal)
+                                    Toast
+                                        .makeText(
+                                            context,
+                                            "${favoriteMeal.name} removed from favorites",
+                                            Toast.LENGTH_SHORT
+                                        )
+                                        .show()
                                 } else {
                                     favoritesViewModel.addFavorite(favoriteMeal)
+                                    Toast
+                                        .makeText(
+                                            context,
+                                            "${favoriteMeal.name} added to favorites",
+                                            Toast.LENGTH_SHORT
+                                        )
+                                        .show()
                                 }
                                 isFavorite = !isFavorite
                             }
@@ -83,74 +96,45 @@ fun FavoriteMealCard(favoriteMeal: FavoriteMeal, favoritesViewModel: FavoritesVi
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(Modifier.height(8.dp))
 
-            // Meal Name
             Text(
                 text = favoriteMeal.name,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                style = MaterialTheme.typography.titleLarge
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(Modifier.height(4.dp))
 
-            Divider(
-                thickness = 1.dp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
-            )
+            Divider(thickness = 1.dp)
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(Modifier.height(4.dp))
 
-            // Expand/Collapse Button
             var expanded by remember { mutableStateOf(false) }
             TextButton(onClick = { expanded = !expanded }) {
-                Text(
-                    text = if (expanded) "Hide Details" else "Show Details",
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Text(if (expanded) "Hide Details" else "Show Details")
             }
 
             if (expanded) {
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(Modifier.height(4.dp))
+                Text("Ingredients:", style = MaterialTheme.typography.titleMedium)
+                Spacer(Modifier.height(4.dp))
 
-                // Ingredients Section
-                Text(
-                    text = "Ingredients:",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(4.dp))
+                Box(Modifier.fillMaxWidth()) {
+                    Ingredients(
+                        favoriteMeal.getIngredients(),
+                        centerText = true
+                    )
+                }
 
-                // If your FavoriteMeal has no `getIngredients()` in the data class,
-                // you must implement it. Otherwise, ensure this function call resolves correctly.
-                // Example:
-                //   fun getIngredients(): List<IngredientWithMeasurement> { ... }
-                // in FavoriteMeal or handle it if it's not available.
-                //
-                // For demonstration, we'll assume you have a matching function that returns List<IngredientWithMeasurement>.
-                Ingredients(favoriteMeal.getIngredients())
+                Spacer(Modifier.height(4.dp))
+                Divider(thickness = 1.dp)
+                Spacer(Modifier.height(4.dp))
 
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Divider(
-                    thickness = 1.dp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Instructions Section
-                Text(
-                    text = "Instructions:",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-
-                // If your FavoriteMeal data class has 'instructions', you can display them here.
+                Text("Instructions:", style = MaterialTheme.typography.titleMedium)
+                Spacer(Modifier.height(4.dp))
                 InstructionList(favoriteMeal.instructions)
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(Modifier.height(8.dp))
 
-                // Share Button
                 Button(
                     onClick = {
                         val contentToShare = "${favoriteMeal.name}\n\n${favoriteMeal.instructions}"
@@ -162,8 +146,8 @@ fun FavoriteMealCard(favoriteMeal: FavoriteMeal, favoritesViewModel: FavoritesVi
                     },
                     modifier = Modifier.align(Alignment.End)
                 ) {
-                    Icon(Icons.Filled.Share, contentDescription = "Share")
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(Icons.Filled.Share, contentDescription = null)
+                    Spacer(Modifier.width(4.dp))
                     Text("Share")
                 }
             }

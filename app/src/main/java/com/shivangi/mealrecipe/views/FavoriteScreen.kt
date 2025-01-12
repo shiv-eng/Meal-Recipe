@@ -1,11 +1,13 @@
-// File: com/shivangi.mealrecipe/views/FavoriteScreen.kt
-
+// ----------------------
+// FavoriteScreen.kt
+// Remove extra top bar, keep consistent minimal blank space
+// and rely on the single top bar from MainActivity
+// ----------------------
 package com.shivangi.mealrecipe.views
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.*
@@ -14,48 +16,29 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.shivangi.mealrecipe.model.FavoriteMeal
 import com.shivangi.mealrecipe.viewModels.FavoritesViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FavoriteScreen(modifier: Modifier = Modifier) {
-    val favoritesViewModel: FavoritesViewModel = viewModel()
-    val favoriteMeals by favoritesViewModel.allFavorites.observeAsState(initial = emptyList())
+    val favoritesVM: FavoritesViewModel = viewModel()
+    val favoriteMeals by favoritesVM.allFavorites.observeAsState(emptyList())
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text("Favorite Meals")
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            )
+    if (favoriteMeals.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .then(modifier),
+            contentAlignment = Alignment.Center
+        ) {
+            BoxText("No favorite meals yet.")
         }
-    ) { paddingValues ->
-        if (favoriteMeals.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "No favorite meals yet.",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
-                items(favoriteMeals) { favoriteMeal ->
-                    FavoriteMealCard(favoriteMeal, favoritesViewModel)
-                    Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
-                }
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .then(modifier),
+            contentPadding = PaddingValues(vertical = 8.dp)
+        ) {
+            items(favoriteMeals) { favMeal ->
+                FavoriteMealCard(favMeal, favoritesVM)
             }
         }
     }

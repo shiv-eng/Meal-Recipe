@@ -2,7 +2,8 @@
 
 package com.shivangi.mealrecipe.views
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,7 +19,8 @@ fun InstructionList(instructions: String) {
                 text = "${index + 1}. $line",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(vertical = 2.dp)
+                // 1 line space between each step
+                modifier = Modifier.padding(vertical = 8.dp)
             )
         }
     }

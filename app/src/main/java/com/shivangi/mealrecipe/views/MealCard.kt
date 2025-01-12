@@ -1,21 +1,21 @@
-// File: com/shivangi.mealrecipe/views/MealCard.kt
-
+// ----------------------
+// MealCard.kt
+// Also remove corners, show toast, minimal space
+// ----------------------
 package com.shivangi.mealrecipe.views
 
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.*
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -26,45 +26,44 @@ import com.shivangi.mealrecipe.viewModels.FavoritesViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun MealCard(meal: Meal, favoritesViewModel: FavoritesViewModel) {
-    val scope = rememberCoroutineScope()
+fun MealCard(
+    meal: Meal,
+    favoritesViewModel: FavoritesViewModel
+) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var isFavorite by remember { mutableStateOf(false) }
 
     LaunchedEffect(favoritesViewModel.allFavorites) {
-        favoritesViewModel.allFavorites.value?.let { favorites ->
-            isFavorite = favorites.any { it.mealId == meal.idMeal }
+        favoritesViewModel.allFavorites.value?.let { list ->
+            isFavorite = list.any { it.mealId == meal.idMeal }
         }
     }
 
     Card(
-        shape = RoundedCornerShape(16.dp),
+        shape = RectangleShape,
         modifier = Modifier
             .fillMaxWidth()
-            .heightIn(min = 300.dp)
-            .padding(horizontal = 8.dp),
+            .heightIn(min = 250.dp)
+            .padding(8.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            // Meal Image with Favorite Icon Overlay
+        Column(modifier = Modifier.padding(8.dp)) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(200.dp)
-                    .clip(RoundedCornerShape(12.dp))
             ) {
                 AsyncImage(
                     model = meal.thumbnail,
-                    contentDescription = "Meal Thumbnail",
+                    contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
                 Icon(
                     imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                    contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
-                    tint = if (isFavorite) Color.Red else Color.White,
+                    contentDescription = null,
+                    tint = if (isFavorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(8.dp)
@@ -79,13 +78,17 @@ fun MealCard(meal: Meal, favoritesViewModel: FavoritesViewModel) {
                                             thumbnail = meal.thumbnail,
                                             origin = meal.origin,
                                             instructions = meal.instructions,
-                                            // Convert all ingredients into a single string if needed:
-                                            ingredient = meal.getIngredients().joinToString("; ") {
+                                            ingredient = meal.getIngredients().joinToString(";") {
                                                 "${it.ingredient}:${it.measurement}"
                                             },
                                             youtubeLink = meal.youtubeLink
                                         )
                                     )
+                                    Toast.makeText(
+                                        context,
+                                        "${meal.name} removed from favorites",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 } else {
                                     favoritesViewModel.addFavorite(
                                         FavoriteMeal(
@@ -94,12 +97,17 @@ fun MealCard(meal: Meal, favoritesViewModel: FavoritesViewModel) {
                                             thumbnail = meal.thumbnail,
                                             origin = meal.origin,
                                             instructions = meal.instructions,
-                                            ingredient = meal.getIngredients().joinToString("; ") {
+                                            ingredient = meal.getIngredients().joinToString(";") {
                                                 "${it.ingredient}:${it.measurement}"
                                             },
                                             youtubeLink = meal.youtubeLink
                                         )
                                     )
+                                    Toast.makeText(
+                                        context,
+                                        "${meal.name} added to favorites",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                                 isFavorite = !isFavorite
                             }
@@ -107,79 +115,50 @@ fun MealCard(meal: Meal, favoritesViewModel: FavoritesViewModel) {
                 )
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(Modifier.height(8.dp))
 
-            // Meal Name
             Text(
                 text = meal.name,
-                style = MaterialTheme.typography.titleLarge,
-                color = MaterialTheme.colorScheme.onSurface
+                style = MaterialTheme.typography.titleLarge
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(Modifier.height(4.dp))
 
-            Divider(
-                thickness = 1.dp,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
-            )
+            Divider(thickness = 1.dp)
+            Spacer(Modifier.height(4.dp))
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Expand/Collapse Button
             var expanded by remember { mutableStateOf(false) }
             TextButton(onClick = { expanded = !expanded }) {
-                Text(
-                    text = if (expanded) "Hide Details" else "Show Details",
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Text(if (expanded) "Hide Details" else "Show Details")
             }
 
             if (expanded) {
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Ingredients Section
-                Text(
-                    text = "Ingredients:",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-
-                // Calls Meal's getIngredients() -> List<IngredientWithMeasurement>.
+                Spacer(Modifier.height(4.dp))
+                Text("Ingredients:", style = MaterialTheme.typography.titleMedium)
+                Spacer(Modifier.height(4.dp))
                 Ingredients(meal.getIngredients())
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(Modifier.height(4.dp))
+                Divider(thickness = 1.dp)
+                Spacer(Modifier.height(4.dp))
 
-                Divider(
-                    thickness = 1.dp,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Instructions Section
-                Text(
-                    text = "Instructions:",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(4.dp))
+                Text("Instructions:", style = MaterialTheme.typography.titleMedium)
+                Spacer(Modifier.height(4.dp))
                 InstructionList(meal.instructions)
 
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Share Button
+                Spacer(Modifier.height(8.dp))
                 Button(
                     onClick = {
-                        val contentToShare = "${meal.name}\n\n${meal.instructions}"
+                        val content = "${meal.name}\n\n${meal.instructions}"
                         val shareIntent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
-                            putExtra(Intent.EXTRA_TEXT, contentToShare)
+                            putExtra(Intent.EXTRA_TEXT, content)
                         }
                         context.startActivity(Intent.createChooser(shareIntent, "Share via"))
                     },
                     modifier = Modifier.align(Alignment.End)
                 ) {
-                    Icon(Icons.Filled.Share, contentDescription = "Share")
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(Icons.Filled.Share, contentDescription = null)
+                    Spacer(Modifier.width(4.dp))
                     Text("Share")
                 }
             }

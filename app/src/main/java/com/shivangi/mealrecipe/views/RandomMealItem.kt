@@ -1,15 +1,17 @@
-// File: com/shivangi.mealrecipe/views/RandomMealItem.kt
-
+// ----------------------
+// RandomMealItem.kt
+// Also remove corners, show toast, minimal space
+// ----------------------
 package com.shivangi.mealrecipe.views
 
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
@@ -17,9 +19,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -33,14 +33,14 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun RandomMealItem(meal: Meal) {
+    val favoritesVM: FavoritesViewModel = viewModel()
     val context = LocalContext.current
-    val favoritesViewModel: FavoritesViewModel = viewModel()
     val scope = rememberCoroutineScope()
     var isFavorite by remember { mutableStateOf(false) }
 
-    LaunchedEffect(favoritesViewModel.allFavorites) {
-        favoritesViewModel.allFavorites.value?.let { favorites ->
-            isFavorite = favorites.any { it.mealId == meal.idMeal }
+    LaunchedEffect(favoritesVM.allFavorites) {
+        favoritesVM.allFavorites.value?.let { list ->
+            isFavorite = list.any { it.mealId == meal.idMeal }
         }
     }
 
@@ -49,26 +49,25 @@ fun RandomMealItem(meal: Meal) {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
-            .verticalScroll(rememberScrollState()),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .verticalScroll(rememberScrollState())
     ) {
-        // Meal Image with Favorite Icon Overlay
+        // Meal Image + favorite
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(240.dp)
-                .clip(RoundedCornerShape(16.dp))
+                .then(Modifier.background(MaterialTheme.colorScheme.surface)) // optional
         ) {
+            // No corner clip
             AsyncImage(
                 model = meal.thumbnail,
-                contentDescription = "Random Meal Thumbnail",
+                contentDescription = null,
                 contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
+                modifier = Modifier.fillMaxSize()
             )
             Icon(
                 imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+                contentDescription = null,
                 tint = if (isFavorite) Color.Red else Color.White,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
@@ -77,81 +76,78 @@ fun RandomMealItem(meal: Meal) {
                     .clickable {
                         scope.launch {
                             if (isFavorite) {
-                                favoritesViewModel.removeFavorite(
+                                favoritesVM.removeFavorite(
                                     FavoriteMeal(
                                         mealId = meal.idMeal,
                                         name = meal.name,
                                         thumbnail = meal.thumbnail,
                                         origin = meal.origin,
                                         instructions = meal.instructions,
-                                        ingredient = meal.getIngredients().joinToString("; ") {
+                                        ingredient = meal.getIngredients().joinToString(";") {
                                             "${it.ingredient}:${it.measurement}"
                                         },
                                         youtubeLink = meal.youtubeLink
                                     )
                                 )
+                                Toast.makeText(
+                                    context,
+                                    "${meal.name} removed from favorites",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             } else {
-                                favoritesViewModel.addFavorite(
+                                favoritesVM.addFavorite(
                                     FavoriteMeal(
                                         mealId = meal.idMeal,
                                         name = meal.name,
                                         thumbnail = meal.thumbnail,
                                         origin = meal.origin,
                                         instructions = meal.instructions,
-                                        ingredient = meal.getIngredients().joinToString("; ") {
+                                        ingredient = meal.getIngredients().joinToString(";") {
                                             "${it.ingredient}:${it.measurement}"
                                         },
                                         youtubeLink = meal.youtubeLink
                                     )
                                 )
+                                Toast.makeText(
+                                    context,
+                                    "${meal.name} added to favorites",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                             isFavorite = !isFavorite
                         }
                     }
             )
         }
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(Modifier.height(16.dp))
 
-        // Meal Name
         Text(
             text = meal.name,
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onBackground
         )
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(Modifier.height(8.dp))
 
-        // Origin
         Text(
             text = "Origin: ${meal.origin}",
             style = MaterialTheme.typography.bodyMedium,
             color = Color.Gray
         )
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(Modifier.height(16.dp))
 
-        // Ingredients Section
-        Text(
-            text = "Ingredients:",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Spacer(modifier = Modifier.height(4.dp))
+        Text("Ingredients:", style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(4.dp))
         Ingredients(meal.getIngredients())
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(Modifier.height(16.dp))
 
-        Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
-        Spacer(modifier = Modifier.height(16.dp))
+        Divider(thickness = 1.dp)
+        Spacer(Modifier.height(16.dp))
 
-        // Instructions Section
-        Text(
-            text = "Instructions:",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Spacer(modifier = Modifier.height(4.dp))
+        Text("Instructions:", style = MaterialTheme.typography.titleMedium)
+        Spacer(Modifier.height(4.dp))
         InstructionList(meal.instructions)
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(Modifier.height(24.dp))
 
-        // YouTube Link and Share Buttons
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
@@ -161,22 +157,21 @@ fun RandomMealItem(meal: Meal) {
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(meal.youtubeLink))
                     context.startActivity(intent)
                 }) {
-                    Icon(Icons.Filled.PlayArrow, contentDescription = "Play")
-                    Spacer(modifier = Modifier.width(4.dp))
+                    Icon(Icons.Filled.PlayArrow, contentDescription = null)
+                    Spacer(Modifier.width(4.dp))
                     Text("Preview")
                 }
             }
-
             Button(onClick = {
-                val contentToShare = "${meal.name}\n${meal.instructions}"
+                val content = "${meal.name}\n${meal.instructions}"
                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
                     type = "text/plain"
-                    putExtra(Intent.EXTRA_TEXT, contentToShare)
+                    putExtra(Intent.EXTRA_TEXT, content)
                 }
                 context.startActivity(Intent.createChooser(shareIntent, "Share via"))
             }) {
-                Icon(Icons.Filled.Share, contentDescription = "Share Recipe")
-                Spacer(modifier = Modifier.width(4.dp))
+                Icon(Icons.Filled.Share, contentDescription = null)
+                Spacer(Modifier.width(4.dp))
                 Text("Share")
             }
         }

@@ -1,41 +1,46 @@
-// File: com/shivangi.mealrecipe/viewModels/SearchMealViewModel.kt
-
 package com.shivangi.mealrecipe.viewModels
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.*
+import com.shivangi.mealrecipe.apiService.mealService
+import com.shivangi.mealrecipe.model.SearchMealState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import com.shivangi.mealrecipe.model.Meal
-
-data class SearchMealState(
-    val loading: Boolean = false,
-    val meals: List<Meal>? = null,
-    val error: String? = null
-)
 
 class SearchMealViewModel : ViewModel() {
 
-    private val _searchQuery = MutableStateFlow("")
-    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
-
+    val searchQuery = mutableStateOf("")
     private val _searchMealState = MutableStateFlow(SearchMealState())
-    val searchMealState: StateFlow<SearchMealState> = _searchMealState.asStateFlow()
+    val searchMealState: StateFlow<SearchMealState> = _searchMealState
 
-    // Provide a public function to set the query
     fun setSearchQuery(query: String) {
-        _searchQuery.value = query
+        searchQuery.value = query
     }
 
     fun fetchSearchMeal() {
         viewModelScope.launch {
-            _searchMealState.value = SearchMealState(loading = true)
             try {
-                // Replace with actual API call or logic
-                val meals = listOf<Meal>() // For demo, just an empty list
-                _searchMealState.value = SearchMealState(meals = meals)
+                if (searchQuery.value.isEmpty()) {
+                    _searchMealState.value = SearchMealState(
+                        loading = false,
+                        error = "Meal name can't be empty"
+                    )
+                    return@launch
+                }
+
+                _searchMealState.value = SearchMealState(loading = true)
+                val searchResponse = mealService.searchMeal(searchQuery.value)
+                _searchMealState.value = SearchMealState(
+                    loading = false,
+                    meals = searchResponse.meals
+                )
             } catch (e: Exception) {
-                _searchMealState.value = SearchMealState(error = e.message)
+                _searchMealState.value = SearchMealState(
+                    loading = false,
+                    error = e.message
+                )
             }
         }
     }

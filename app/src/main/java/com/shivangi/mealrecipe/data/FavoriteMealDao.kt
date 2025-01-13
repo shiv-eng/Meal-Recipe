@@ -1,5 +1,3 @@
-// File: com/shivangi/mealrecipe/data/FavoriteMealDao.kt
-
 package com.shivangi.mealrecipe.data
 
 import androidx.room.*

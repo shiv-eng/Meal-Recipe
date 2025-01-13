@@ -1,7 +1,3 @@
-// ----------------------
-// RandomMealItem.kt
-// Also remove corners, show toast, minimal space
-// ----------------------
 package com.shivangi.mealrecipe.views
 
 import android.content.Intent

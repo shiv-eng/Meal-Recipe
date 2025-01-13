@@ -1,5 +1,3 @@
-// File: com/shivangi.mealrecipe/views/BoxText.kt
-
 package com.shivangi.mealrecipe.views
 
 import androidx.compose.foundation.layout.*

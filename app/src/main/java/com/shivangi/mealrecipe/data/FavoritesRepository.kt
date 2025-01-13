@@ -1,5 +1,3 @@
-// File: com/shivangi/mealrecipe/data/FavoritesRepository.kt
-
 package com.shivangi.mealrecipe.data
 
 import com.shivangi.mealrecipe.model.FavoriteMeal

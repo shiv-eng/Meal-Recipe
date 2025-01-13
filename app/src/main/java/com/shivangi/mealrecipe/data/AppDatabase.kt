@@ -1,5 +1,3 @@
-// File: com/shivangi/mealrecipe/data/AppDatabase.kt
-
 package com.shivangi.mealrecipe.data
 
 import android.content.Context

@@ -1,6 +1,3 @@
-// File: com/shivangi.mealrecipe/views/MealCard.kt
-// Rectangular design, minimal space, toast on add/remove, consistent style
-
 package com.shivangi.mealrecipe.views
 
 import android.content.Intent
@@ -31,6 +28,7 @@ fun MealCard(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    var expanded by remember { mutableStateOf(false) }
     var isFavorite by remember { mutableStateOf(false) }
 
     LaunchedEffect(favoritesViewModel.allFavorites) {
@@ -44,7 +42,8 @@ fun MealCard(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 250.dp)
-            .padding(8.dp),
+            .padding(8.dp)
+        .clickable { expanded = !expanded },
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
@@ -122,11 +121,6 @@ fun MealCard(
             Spacer(Modifier.height(4.dp))
             Divider(thickness = 1.dp)
             Spacer(Modifier.height(4.dp))
-
-            var expanded by remember { mutableStateOf(false) }
-            TextButton(onClick = { expanded = !expanded }) {
-                Text(if (expanded) "Hide Details" else "Show Details")
-            }
 
             if (expanded) {
                 Spacer(Modifier.height(4.dp))

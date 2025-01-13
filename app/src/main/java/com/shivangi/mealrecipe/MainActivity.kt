@@ -1,4 +1,3 @@
-// File: com/shivangi.mealrecipe/MainActivity.kt
 package com.shivangi.mealrecipe
 
 import android.os.Bundle
@@ -20,12 +19,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.*
 import com.shivangi.mealrecipe.ui.theme.RentalsTheme
 import com.shivangi.mealrecipe.viewModels.FavoritesViewModel
 import com.shivangi.mealrecipe.viewModels.SearchMealViewModel
 import com.shivangi.mealrecipe.views.*
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
@@ -35,8 +34,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             RentalsTheme {
                 val navController = rememberNavController()
-                val searchVM = androidx.lifecycle.viewmodel.compose.viewModel<SearchMealViewModel>()
-                val favoritesVM = androidx.lifecycle.viewmodel.compose.viewModel<FavoritesViewModel>()
+                val searchVM: SearchMealViewModel = viewModel()
+                val favoritesVM: FavoritesViewModel = viewModel()
 
                 val searchState by searchVM.searchMealState.collectAsState()
 
@@ -81,6 +80,7 @@ class MainActivity : ComponentActivity() {
                                     IconButton(onClick = {
                                         isSearching = false
                                         searchText = TextFieldValue("")
+                                        searchVM.setSearchQuery("")
                                         searchVM.fetchSearchMeal()
                                     }) {
                                         Icon(Icons.Filled.Close, null)

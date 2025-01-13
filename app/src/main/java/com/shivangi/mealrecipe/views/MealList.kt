@@ -1,6 +1,3 @@
-// File: com/shivangi.mealrecipe/views/MealList.kt
-// Minimal spacing, same design as favorite, rectangular corners, same toast logic.
-
 package com.shivangi.mealrecipe.views
 
 import androidx.compose.foundation.layout.*

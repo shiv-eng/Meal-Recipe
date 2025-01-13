@@ -1,6 +1,3 @@
-// File: com/shivangi.mealrecipe/views/Ingredients.kt
-// Provide centerText param. Usually for favorites we center, for meal we keep left.
-
 package com.shivangi.mealrecipe.views
 
 import androidx.compose.foundation.layout.*

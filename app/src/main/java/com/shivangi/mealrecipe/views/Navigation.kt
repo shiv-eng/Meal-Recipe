@@ -1,5 +1,3 @@
-// File: com/shivangi/mealrecipe/views/Navigation.kt
-
 package com.shivangi.mealrecipe.views
 
 import androidx.compose.foundation.layout.PaddingValues

@@ -1,5 +1,3 @@
-// File: com/shivangi/mealrecipe/views/RandomMealScreen.kt
-
 package com.shivangi.mealrecipe.views
 
 import androidx.compose.foundation.background

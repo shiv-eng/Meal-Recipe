@@ -1,5 +1,3 @@
-// File: com/shivangi/mealrecipe/viewModels/FavoritesViewModel.kt
-
 package com.shivangi.mealrecipe.viewModels
 
 import android.app.Application

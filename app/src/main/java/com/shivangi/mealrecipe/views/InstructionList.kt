@@ -1,6 +1,3 @@
-// File: com/shivangi.mealrecipe/views/InstructionList.kt
-// One line space between instructions
-
 package com.shivangi.mealrecipe.views
 
 import androidx.compose.foundation.layout.*

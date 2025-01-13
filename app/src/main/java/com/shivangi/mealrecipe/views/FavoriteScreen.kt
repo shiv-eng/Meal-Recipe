@@ -1,6 +1,3 @@
-// File: com/shivangi.mealrecipe/views/FavoriteScreen.kt
-// Identical design: no separate top bar, minimal space.
-
 package com.shivangi.mealrecipe.views
 
 import androidx.compose.foundation.layout.*
@@ -11,7 +8,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.shivangi.mealrecipe.model.FavoriteMeal
 import com.shivangi.mealrecipe.viewModels.FavoritesViewModel
 
 @Composable

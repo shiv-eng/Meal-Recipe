@@ -1,6 +1,3 @@
-// File: com/shivangi.mealrecipe/views/FavoriteMealCard.kt
-// Same rectangular design, center ingredients, show toast, minimal spacing
-
 package com.shivangi.mealrecipe.views
 
 import android.content.Intent
@@ -19,6 +16,8 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
+import coil.compose.SubcomposeAsyncImageContent
 import com.shivangi.mealrecipe.model.FavoriteMeal
 import com.shivangi.mealrecipe.viewModels.FavoritesViewModel
 import kotlinx.coroutines.launch
@@ -31,6 +30,7 @@ fun FavoriteMealCard(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var isFavorite by remember { mutableStateOf(true) }
+    var expanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(favoritesViewModel.allFavorites) {
         favoritesViewModel.allFavorites.value?.let { all ->
@@ -43,7 +43,9 @@ fun FavoriteMealCard(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 250.dp)
-            .padding(8.dp),
+            .padding(8.dp)
+            .clickable { expanded = !expanded }
+        ,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(
@@ -53,12 +55,19 @@ fun FavoriteMealCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(250.dp)
+                    .clickable { expanded = !expanded }
             ) {
-                AsyncImage(
+                SubcomposeAsyncImage(
                     model = favoriteMeal.thumbnail,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
+                    loading = {
+                        CircularProgressIndicator(Modifier.align(Alignment.Center))
+                    },
+                    success = {
+                        SubcomposeAsyncImageContent()
+                    }
                 )
                 Icon(
                     imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
@@ -101,19 +110,11 @@ fun FavoriteMealCard(
             Divider(thickness = 1.dp)
             Spacer(Modifier.height(4.dp))
 
-            var expanded by remember { mutableStateOf(false) }
-            TextButton(onClick = { expanded = !expanded }) {
-                Text(if (expanded) "Hide Details" else "Show Details")
-            }
-
             if (expanded) {
                 Spacer(Modifier.height(4.dp))
                 Text("Ingredients:", style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(4.dp))
-                // Center ingredients
-                Box(Modifier.fillMaxWidth()) {
-                    Ingredients(favoriteMeal.getIngredients(), centerText = false)
-                }
+                Ingredients(favoriteMeal.getIngredients(), centerText = false)
                 Spacer(Modifier.height(4.dp))
                 Divider(thickness = 1.dp)
                 Spacer(Modifier.height(4.dp))
@@ -121,8 +122,8 @@ fun FavoriteMealCard(
                 Text("Instructions:", style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(4.dp))
                 InstructionList(favoriteMeal.instructions)
-
                 Spacer(Modifier.height(8.dp))
+
                 Button(
                     onClick = {
                         val content = "${favoriteMeal.name}\n\n${favoriteMeal.instructions}"

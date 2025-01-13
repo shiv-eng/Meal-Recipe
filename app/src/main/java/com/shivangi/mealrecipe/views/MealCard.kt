@@ -1,7 +1,6 @@
-// ----------------------
-// MealCard.kt
-// Also remove corners, show toast, minimal space
-// ----------------------
+// File: com/shivangi.mealrecipe/views/MealCard.kt
+// Rectangular design, minimal space, toast on add/remove, consistent style
+
 package com.shivangi.mealrecipe.views
 
 import android.content.Intent
@@ -114,7 +113,6 @@ fun MealCard(
                         }
                 )
             }
-
             Spacer(Modifier.height(8.dp))
 
             Text(
@@ -122,7 +120,6 @@ fun MealCard(
                 style = MaterialTheme.typography.titleLarge
             )
             Spacer(Modifier.height(4.dp))
-
             Divider(thickness = 1.dp)
             Spacer(Modifier.height(4.dp))
 
@@ -135,7 +132,7 @@ fun MealCard(
                 Spacer(Modifier.height(4.dp))
                 Text("Ingredients:", style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(4.dp))
-                Ingredients(meal.getIngredients())
+                Ingredients(meal.getIngredients(), centerText = false)
 
                 Spacer(Modifier.height(4.dp))
                 Divider(thickness = 1.dp)
@@ -157,7 +154,7 @@ fun MealCard(
                     },
                     modifier = Modifier.align(Alignment.End)
                 ) {
-                    Icon(Icons.Filled.Share, contentDescription = null)
+                    Icon(Icons.Filled.Share, null)
                     Spacer(Modifier.width(4.dp))
                     Text("Share")
                 }

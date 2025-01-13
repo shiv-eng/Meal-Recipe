@@ -1,7 +1,6 @@
-// ----------------------
-// FavoriteMealCard.kt
-// Make corners square, center ingredients, show toast, minimal blank space
-// ----------------------
+// File: com/shivangi.mealrecipe/views/FavoriteMealCard.kt
+// Same rectangular design, center ingredients, show toast, minimal spacing
+
 package com.shivangi.mealrecipe.views
 
 import android.content.Intent
@@ -34,8 +33,8 @@ fun FavoriteMealCard(
     var isFavorite by remember { mutableStateOf(true) }
 
     LaunchedEffect(favoritesViewModel.allFavorites) {
-        favoritesViewModel.allFavorites.value?.let { list ->
-            isFavorite = list.any { it.mealId == favoriteMeal.mealId }
+        favoritesViewModel.allFavorites.value?.let { all ->
+            isFavorite = all.any { it.mealId == favoriteMeal.mealId }
         }
     }
 
@@ -44,7 +43,7 @@ fun FavoriteMealCard(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 250.dp)
-            .padding(horizontal = 8.dp),
+            .padding(8.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(
@@ -53,7 +52,7 @@ fun FavoriteMealCard(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
+                    .height(250.dp)
             ) {
                 AsyncImage(
                     model = favoriteMeal.thumbnail,
@@ -73,22 +72,18 @@ fun FavoriteMealCard(
                             scope.launch {
                                 if (isFavorite) {
                                     favoritesViewModel.removeFavorite(favoriteMeal)
-                                    Toast
-                                        .makeText(
-                                            context,
-                                            "${favoriteMeal.name} removed from favorites",
-                                            Toast.LENGTH_SHORT
-                                        )
-                                        .show()
+                                    Toast.makeText(
+                                        context,
+                                        "${favoriteMeal.name} removed from favorites",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 } else {
                                     favoritesViewModel.addFavorite(favoriteMeal)
-                                    Toast
-                                        .makeText(
-                                            context,
-                                            "${favoriteMeal.name} added to favorites",
-                                            Toast.LENGTH_SHORT
-                                        )
-                                        .show()
+                                    Toast.makeText(
+                                        context,
+                                        "${favoriteMeal.name} added to favorites",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                                 isFavorite = !isFavorite
                             }
@@ -103,9 +98,7 @@ fun FavoriteMealCard(
                 style = MaterialTheme.typography.titleLarge
             )
             Spacer(Modifier.height(4.dp))
-
             Divider(thickness = 1.dp)
-
             Spacer(Modifier.height(4.dp))
 
             var expanded by remember { mutableStateOf(false) }
@@ -117,14 +110,10 @@ fun FavoriteMealCard(
                 Spacer(Modifier.height(4.dp))
                 Text("Ingredients:", style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(4.dp))
-
+                // Center ingredients
                 Box(Modifier.fillMaxWidth()) {
-                    Ingredients(
-                        favoriteMeal.getIngredients(),
-                        centerText = true
-                    )
+                    Ingredients(favoriteMeal.getIngredients(), centerText = false)
                 }
-
                 Spacer(Modifier.height(4.dp))
                 Divider(thickness = 1.dp)
                 Spacer(Modifier.height(4.dp))
@@ -134,19 +123,18 @@ fun FavoriteMealCard(
                 InstructionList(favoriteMeal.instructions)
 
                 Spacer(Modifier.height(8.dp))
-
                 Button(
                     onClick = {
-                        val contentToShare = "${favoriteMeal.name}\n\n${favoriteMeal.instructions}"
+                        val content = "${favoriteMeal.name}\n\n${favoriteMeal.instructions}"
                         val shareIntent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
-                            putExtra(Intent.EXTRA_TEXT, contentToShare)
+                            putExtra(Intent.EXTRA_TEXT, content)
                         }
                         context.startActivity(Intent.createChooser(shareIntent, "Share via"))
                     },
                     modifier = Modifier.align(Alignment.End)
                 ) {
-                    Icon(Icons.Filled.Share, contentDescription = null)
+                    Icon(Icons.Filled.Share, null)
                     Spacer(Modifier.width(4.dp))
                     Text("Share")
                 }

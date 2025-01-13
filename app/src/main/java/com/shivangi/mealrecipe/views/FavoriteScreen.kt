@@ -1,8 +1,6 @@
-// ----------------------
-// FavoriteScreen.kt
-// Remove extra top bar, keep consistent minimal blank space
-// and rely on the single top bar from MainActivity
-// ----------------------
+// File: com/shivangi.mealrecipe/views/FavoriteScreen.kt
+// Identical design: no separate top bar, minimal space.
+
 package com.shivangi.mealrecipe.views
 
 import androidx.compose.foundation.layout.*
@@ -10,7 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.shivangi.mealrecipe.model.FavoriteMeal
@@ -26,7 +24,7 @@ fun FavoriteScreen(modifier: Modifier = Modifier) {
             modifier = Modifier
                 .fillMaxSize()
                 .then(modifier),
-            contentAlignment = Alignment.Center
+            contentAlignment = androidx.compose.ui.Alignment.Center
         ) {
             BoxText("No favorite meals yet.")
         }
@@ -37,8 +35,8 @@ fun FavoriteScreen(modifier: Modifier = Modifier) {
                 .then(modifier),
             contentPadding = PaddingValues(vertical = 8.dp)
         ) {
-            items(favoriteMeals) { favMeal ->
-                FavoriteMealCard(favMeal, favoritesVM)
+            items(favoriteMeals) { fav ->
+                FavoriteMealCard(fav, favoritesVM)
             }
         }
     }

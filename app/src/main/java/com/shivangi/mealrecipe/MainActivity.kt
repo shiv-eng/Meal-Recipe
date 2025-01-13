@@ -1,9 +1,4 @@
-// ----------------------
-// MainActivity.kt
-// Single top bar across the entire app.
-// The title becomes "Favorite Meals" if current route is FavoriteScreen, else "Meal Recipe".
-// Search is unchanged, uses the original logic from your SearchMealViewModel.
-// ----------------------
+// File: com/shivangi.mealrecipe/MainActivity.kt
 package com.shivangi.mealrecipe
 
 import android.os.Bundle
@@ -11,14 +6,20 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.*
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Shuffle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.*
-import androidx.compose.ui.text.input.*
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.*
 import com.shivangi.mealrecipe.ui.theme.RentalsTheme
 import com.shivangi.mealrecipe.viewModels.FavoritesViewModel
@@ -34,20 +35,20 @@ class MainActivity : ComponentActivity() {
         setContent {
             RentalsTheme {
                 val navController = rememberNavController()
-
-                val searchVM: SearchMealViewModel = viewModel()
-                val favoritesVM: FavoritesViewModel = viewModel()
+                val searchVM = androidx.lifecycle.viewmodel.compose.viewModel<SearchMealViewModel>()
+                val favoritesVM = androidx.lifecycle.viewmodel.compose.viewModel<FavoritesViewModel>()
 
                 val searchState by searchVM.searchMealState.collectAsState()
 
                 var isSearching by remember { mutableStateOf(false) }
                 var searchText by remember { mutableStateOf(TextFieldValue("")) }
 
-                // Observe current route to switch top bar title if on favorites
-                val currentBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentRoute = currentBackStackEntry?.destination?.route
-                val topBarTitle = if (currentRoute == Screen.FavoriteScreen.route) "Favorite Meals"
-                else "Meal Recipe"
+                val currentEntry by navController.currentBackStackEntryAsState()
+                val currentRoute = currentEntry?.destination?.route
+                val topTitle = when (currentRoute) {
+                    Screen.FavoriteScreen.route -> "Favorite Meals"
+                    else -> "Meal Recipe"
+                }
 
                 Scaffold(
                     topBar = {
@@ -72,7 +73,7 @@ class MainActivity : ComponentActivity() {
                                         modifier = Modifier.fillMaxWidth()
                                     )
                                 } else {
-                                    Text(topBarTitle)
+                                    Text(topTitle)
                                 }
                             },
                             navigationIcon = {
@@ -80,17 +81,16 @@ class MainActivity : ComponentActivity() {
                                     IconButton(onClick = {
                                         isSearching = false
                                         searchText = TextFieldValue("")
-                                        // Re-fetch or clear results if you want
                                         searchVM.fetchSearchMeal()
                                     }) {
-                                        Icon(Icons.Filled.Close, contentDescription = null)
+                                        Icon(Icons.Filled.Close, null)
                                     }
                                 }
                             },
                             actions = {
                                 if (!isSearching) {
                                     IconButton(onClick = { isSearching = true }) {
-                                        Icon(Icons.Filled.Search, contentDescription = null)
+                                        Icon(Icons.Filled.Search, null)
                                     }
                                 } else {
                                     IconButton(onClick = {
@@ -98,55 +98,49 @@ class MainActivity : ComponentActivity() {
                                         searchVM.fetchSearchMeal()
                                         isSearching = false
                                     }) {
-                                        Icon(Icons.Filled.Check, contentDescription = null)
+                                        Icon(Icons.Filled.Check, null)
                                     }
                                 }
                                 IconButton(onClick = {
                                     navController.navigate(Screen.RandomMealScreen.route)
                                 }) {
-                                    Icon(Icons.Filled.Shuffle, contentDescription = null)
+                                    Icon(Icons.Filled.Shuffle, null)
                                 }
                                 IconButton(onClick = {
                                     navController.navigate(Screen.FavoriteScreen.route) {
                                         popUpTo(Screen.RandomMealScreen.route) { inclusive = false }
                                     }
                                 }) {
-                                    Icon(Icons.Filled.Favorite, contentDescription = null)
+                                    Icon(Icons.Filled.Favorite, null)
                                 }
                             },
                             colors = TopAppBarDefaults.topAppBarColors(
                                 containerColor = MaterialTheme.colorScheme.primary,
-                                titleContentColor = MaterialTheme.colorScheme.onPrimary
+                                titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                                navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+                                actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                             )
                         )
                     }
                 ) { innerPadding ->
-                    Box(modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .padding(0.dp)
                     ) {
-                        // If user is searching and typed something, show those results
                         if (isSearching && searchText.text.isNotBlank()) {
                             when {
-                                searchState.loading -> {
-                                    BoxText("Searching...")
-                                }
-                                searchState.error != null -> {
-                                    BoxText("Error: ${searchState.error}")
-                                }
+                                searchState.loading -> BoxText("Searching...")
+                                searchState.error != null -> BoxText("Error: ${searchState.error}")
                                 !searchState.meals.isNullOrEmpty() -> {
-                                    // Show the meal list with favorites
                                     MealList(
                                         meals = searchState.meals!!,
                                         favoritesViewModel = favoritesVM
                                     )
                                 }
-                                else -> {
-                                    BoxText("No results found.")
-                                }
+                                else -> BoxText("No results found.")
                             }
                         } else {
-                            // Normal navigation
                             Navigation(navController, innerPadding)
                         }
                     }

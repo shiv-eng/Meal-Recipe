@@ -1,13 +1,12 @@
-// ----------------------
-// Ingredients.kt
-// Provide centerText param for FavoriteMeal if needed
-// ----------------------
+// File: com/shivangi.mealrecipe/views/Ingredients.kt
+// Provide centerText param. Usually for favorites we center, for meal we keep left.
+
 package com.shivangi.mealrecipe.views
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.*
 import androidx.compose.ui.unit.dp
 import com.shivangi.mealrecipe.model.IngredientWithMeasurement
@@ -25,15 +24,10 @@ fun Ingredients(
     ) {
         ingredients.forEach { item ->
             Row(modifier = Modifier.padding(vertical = 2.dp)) {
-                Text(
-                    text = "• ",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Text("• ", style = MaterialTheme.typography.bodyMedium)
                 Text(
                     text = "${item.ingredient}: ${item.measurement}",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         }

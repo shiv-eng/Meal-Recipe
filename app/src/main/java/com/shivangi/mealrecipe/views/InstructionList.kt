@@ -1,25 +1,24 @@
 // File: com/shivangi.mealrecipe/views/InstructionList.kt
+// One line space between instructions
 
 package com.shivangi.mealrecipe.views
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.*
+import androidx.compose.ui.*
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun InstructionList(instructions: String) {
-    val instructionsLines = instructions.split("\n").filter { it.isNotBlank() }
-    Column(modifier = Modifier.padding(start = 8.dp)) {
-        instructionsLines.forEachIndexed { index, line ->
+    val lines = instructions.split("\n").filter { it.isNotBlank() }
+    Column(Modifier.padding(start = 8.dp)) {
+        lines.forEachIndexed { i, line ->
             Text(
-                text = "${index + 1}. $line",
+                text = "${i + 1}. $line",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
-                // 1 line space between each step
                 modifier = Modifier.padding(vertical = 8.dp)
             )
         }

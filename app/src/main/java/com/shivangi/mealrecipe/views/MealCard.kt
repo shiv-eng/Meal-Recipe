@@ -139,7 +139,10 @@ fun MealCard(
                 Spacer(Modifier.height(8.dp))
                 Button(
                     onClick = {
-                        val content = "${meal.name}\n\n${meal.instructions}"
+
+                        val content = "${meal.name}\n" +
+                                {meal.getIngredients().joinToString(";")}+
+                                "\n${meal.instructions}"
                         val shareIntent = Intent(Intent.ACTION_SEND).apply {
                             type = "text/plain"
                             putExtra(Intent.EXTRA_TEXT, content)

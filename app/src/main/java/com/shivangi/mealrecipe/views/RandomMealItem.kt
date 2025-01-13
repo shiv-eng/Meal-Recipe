@@ -54,7 +54,6 @@ fun RandomMealItem(meal: Meal) {
                 .height(240.dp)
                 .then(Modifier.background(MaterialTheme.colorScheme.surface)) // optional
         ) {
-            // No corner clip
             AsyncImage(
                 model = meal.thumbnail,
                 contentDescription = null,

@@ -13,7 +13,7 @@ fun InstructionList(instructions: String) {
     Column(Modifier.padding(start = 8.dp)) {
         lines.forEachIndexed { i, line ->
             Text(
-                text = "${i + 1}. $line",
+                text = "- $line",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.padding(vertical = 8.dp)
